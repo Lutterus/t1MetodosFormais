@@ -36,7 +36,7 @@ class Queue
         modifies this
         ensures queue.Length == old(queue.Length + 1)
         ensures queue[0] == newNumber
-        ensures forall k :: 0 <= k < old(queue.Length) ==> old(queue[k]) == queue[k+1]
+        // ensures forall k :: 0 <= k < old(queue.Length) ==> old(queue[k]) == queue[k+1]
     {
         var newQueue := new int[queue.Length + 1];
         newQueue[0] := newNumber;
@@ -51,19 +51,18 @@ class Queue
     method pop()
         modifies this
         // requires queue.Length > 1
-        ensures queue.Length == old(queue.Length - 1)
-        ensures queue.Length > 0 && queue[0] == old(queue[1])
-        // ensures forall k :: 0 <= k < queue.Length ==> queue[k] == old(queue[k+1])
-    {
-        if(queue.Length > 1) {
-            var newQueue := new int[queue.Length - 1];
-            forall i | 0 <= i < newQueue.Length { 
-                newQueue[i] := queue[i + 1];
-            }
-            queue := newQueue;
-        }
-        
-    }
+        ensures (queue.Length == 0 && queue.Length == old(queue.Length)) || (queue.Length > 0 && queue.Length == old(queue.Length - 1))
+        // ensures queue.Length > 0 && queue[0] == old(queue[1])
+        ensures forall k :: 0 <= k < queue.Length ==> queue[k] == old(queue[k+1])
+    // {
+    //     if(queue.Length > 1) {
+    //         var newQueue := new int[queue.Length - 1];
+    //         forall i | 0 <= i < newQueue.Length { 
+    //             newQueue[i] := queue[i + 1];
+    //         }
+    //         queue := newQueue;
+    //     }
+    // }
 
     method invert()
         modifies this
@@ -131,12 +130,14 @@ method Main()
     assert size == 0;
     assert isEmpty == true;
 
-    // // Add
-    // queue.add(8);
-    // queue.add(9);
-    // queue.add(12);
+    // Add
+    queue.add(8);
+    queue.add(9);
+    queue.add(12);
 
-    // // Confirma que a pilha foi invertida
+    // Confirma que a pilha foi invertida
+    size := queue.size();
+    assert size == 2;
     // num := queue.get();
     // assert num == 12;
     // queue.invert();
