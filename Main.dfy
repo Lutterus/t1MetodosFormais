@@ -50,36 +50,32 @@ class Queue
 
     method pop()
         modifies this
-        // requires queue.Length > 0
+        requires queue.Length > 0
         // ensures (old(queue.Length) == 1 && queue.Length == 0)
         ensures (queue.Length >= 0 && queue.Length == old(queue.Length - 1))
         ensures forall k :: 0 <= k < queue.Length ==> queue[k] == old(queue[k+1])
-    // {
-    //     if(queue.Length > 0) {
-    //         var newQueue := new int[queue.Length - 1];
-    //         forall i | 0 <= i < newQueue.Length { 
-    //             newQueue[i] := queue[i + 1];
-    //         }
-    //         queue := newQueue;
-    //     }
-    // }
+    {
+        var newQueue := new int[queue.Length - 1];
+        forall i | 0 <= i < newQueue.Length { 
+            newQueue[i] := queue[i + 1];
+        }
+        queue := newQueue;
+    }
 
     method invert()
         modifies this
-        // requires queue.Length > 1
+        requires queue.Length > 0
         ensures queue.Length == old(queue.Length)
         ensures forall k :: 0 <= k < queue.Length ==> queue[k] == old(queue[queue.Length - (k+1)])
-        // ensures queue[queue.Length - 1] == old(queue[0]) && queue[0] == old(queue[queue.Length - 1])
-        // ensures forall k | 0 <= k < i :: queue[k] == old(queue[queue.Length-1-k])
-    // {
-    //     var newQueue := new int[queue.Length];
-    //     forall i | 1 <= i < queue.Length
-    //     { 
-    //         newQueue[i] := queue[queue.Length - (i + 1)];
-    //     }
-    //     queue := newQueue;
-    //     // forall k | 0 <= k < i :: newQueue[k] == queue[queue.Length-1-k];
-    // }
+        // ensures (queue.Length > 0 && queue[0] == old(queue[queue.Length-1]))
+    {
+        var newQueue := new int[queue.Length];
+        forall i | 1 <= i < queue.Length
+        { 
+            newQueue[i] := queue[queue.Length - (i + 1)];
+        }
+        queue := newQueue;
+    }
 }
 
 method Main()
@@ -145,4 +141,21 @@ method Main()
     queue.invert();
     num := queue.get();
     assert num == 8;
+
+    // Confirma o tamanho
+    isEmpty := queue.isEmpty();
+    size := queue.size();
+    assert size == 3;
+    assert isEmpty == false;
+
+    // Esvazia a fila
+    queue.pop();
+    queue.pop();
+    queue.pop();
+
+    // Confirma que esta vazio
+    isEmpty := queue.isEmpty();
+    size := queue.size();
+    assert size == 0;
+    assert isEmpty == true;
 }
