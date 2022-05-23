@@ -36,6 +36,7 @@ class Queue
         modifies this
         ensures queue.Length == old(queue.Length + 1)
         ensures queue[0] == newNumber
+        ensures forall k :: 0 <= k < old(queue.Length) ==> old(queue[k]) == queue[k+1]
     {
         var newQueue := new int[queue.Length + 1];
         newQueue[0] := newNumber;
@@ -49,21 +50,24 @@ class Queue
 
     method pop()
         modifies this
-        requires queue.Length > 1
+        // requires queue.Length > 1
         ensures queue.Length == old(queue.Length - 1)
-        ensures queue[0] == old(queue[1])
+        ensures queue.Length > 0 && queue[0] == old(queue[1])
         // ensures forall k :: 0 <= k < queue.Length ==> queue[k] == old(queue[k+1])
     {
-        var newQueue := new int[queue.Length - 1];
-        forall i | 0 <= i < newQueue.Length { 
-            newQueue[i] := queue[i + 1];
+        if(queue.Length > 1) {
+            var newQueue := new int[queue.Length - 1];
+            forall i | 0 <= i < newQueue.Length { 
+                newQueue[i] := queue[i + 1];
+            }
+            queue := newQueue;
         }
-        queue := newQueue;
+        
     }
 
     method invert()
         modifies this
-        requires queue.Length > 0
+        requires queue.Length > 1
         ensures queue.Length == old(queue.Length)
         // ensures forall k :: 0 <= k < queue.Length ==> queue[k] == old(queue[queue.Length - (k+1)])
         // ensures queue[queue.Length - 1] == old(queue[0]) && queue[0] == old(queue[queue.Length - 1])
@@ -120,12 +124,12 @@ method Main()
     assert num == 2;
 
 
-    // // Confirma que a pilha esta vazia
-    // queue.pop();
-    // isEmpty := queue.isEmpty();
-    // size := queue.size();
-    // assert size == 0;
-    // assert isEmpty == true;
+    // Confirma que a pilha esta vazia
+    queue.pop();
+    isEmpty := queue.isEmpty();
+    size := queue.size();
+    assert size == 0;
+    assert isEmpty == true;
 
     // // Add
     // queue.add(8);
