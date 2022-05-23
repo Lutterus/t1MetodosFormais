@@ -64,13 +64,11 @@ class Queue
 
     method invert()
         modifies this
-        requires queue.Length > 0
         ensures queue.Length == old(queue.Length)
         ensures forall k :: 0 <= k < queue.Length ==> queue[k] == old(queue[queue.Length - (k+1)])
-        // ensures (queue.Length > 0 && queue[0] == old(queue[queue.Length-1]))
     {
         var newQueue := new int[queue.Length];
-        forall i | 1 <= i < queue.Length
+        forall i | 0 <= i < queue.Length
         { 
             newQueue[i] := queue[queue.Length - (i + 1)];
         }
