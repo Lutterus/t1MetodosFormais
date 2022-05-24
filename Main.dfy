@@ -39,8 +39,7 @@ class {:autocontracts} Queue
     method size() returns (size:int)
         ensures size == queueSizeAbs
     {
-        size := queue.Length;
-        return size;
+        return queue.Length;
     }
 
     method get() returns (num:int)
@@ -51,8 +50,6 @@ class {:autocontracts} Queue
     }
 
     method add(newNumber:nat)
-        ensures queueSizeAbs == old(queueSizeAbs + 1)
-        ensures queueAbs[0] == newNumber
         ensures queueAbs == [newNumber] + old(queueAbs)
         // ensures forall k :: 1 <= k < queueSizeAbs ==> queue[k] == old(queue[k-1])
     {
