@@ -130,14 +130,16 @@ method Main()
     // Confirma o numero no topo da pilha
     num := queue.get();
     assert num == 6;
+    // Confirma novo tamanho
     size := queue.size();
     assert size == 2;
 
     // Remove elemento
     queue.pop();
-    // Confirma o numero no topo da pilha
+    // Confirma novo tamanho
     size := queue.size();
     assert size == 1;
+    // Confirma numero no topo da pilha
     num := queue.get();
     assert num == 5;
 
@@ -154,14 +156,15 @@ method Main()
     queue.add(9);
     queue.add(12);
 
-    // Confirma ao reeprenchimento da pilha
+    // Confirma o reeprenchimento da pilha
     size := queue.size();
     assert size == 3;
     num := queue.get();
     assert num == 12;
 
-    // Confirma que a pilha foi invertida
+    // Inverte a pilha inteira
     queue.invert();
+    // Confirma que a pilha foi invertida
     num := queue.get();
     assert num == 8;
 
