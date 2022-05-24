@@ -45,15 +45,16 @@ class {:autocontracts} Queue
 
     method get() returns (num:int)
         requires queueSizeAbs > 0
-        ensures num == queue[0]
+        ensures num == queueAbs[0]
     {
         return queue[0];
     }
 
     method add(newNumber:nat)
         ensures queueSizeAbs == old(queueSizeAbs + 1)
-        ensures queue[0] == newNumber
-        ensures forall k :: 1 <= k < queueSizeAbs ==> queue[k] == old(queue[k-1])
+        ensures queueAbs[0] == newNumber
+        ensures queueAbs == [newNumber] + old(queueAbs)
+        // ensures forall k :: 1 <= k < queueSizeAbs ==> queue[k] == old(queue[k-1])
     {
         var newQueue := new int[queue.Length + 1];
         newQueue[0] := newNumber;
@@ -64,14 +65,15 @@ class {:autocontracts} Queue
 
         queue := newQueue;
         // Atualiza ghosts
-        queueAbs := queue[0..queue.Length];
+        queueAbs := [newNumber] + queueAbs;
         queueSizeAbs := queueSizeAbs + 1;
     }
 
     method pop()
         requires queueSizeAbs > 0
         ensures (queueSizeAbs >= 0 && queueSizeAbs == old(queueSizeAbs - 1))
-        ensures forall k :: 0 <= k < queueSizeAbs ==> queue[k] == old(queue[k+1])
+        ensures queueAbs == old(queueAbs)[1..]
+        // ensures forall k :: 0 <= k < queueSizeAbs ==> queue[k] == old(queue[k+1])
     {
         var newQueue := new int[queue.Length - 1];
         forall i | 0 <= i < queue.Length - 1 { 
@@ -85,7 +87,7 @@ class {:autocontracts} Queue
 
     method invert()
         ensures queueSizeAbs == old(queueSizeAbs)
-        ensures forall k :: 0 <= k < queueSizeAbs ==> queue[k] == old(queue[queueSizeAbs - (k+1)])
+        ensures forall k :: 0 <= k < queueSizeAbs ==> queueAbs[k] == old(queueAbs[queueSizeAbs - (k+1)])
     {
         var newQueue := new int[queue.Length];
         forall i | 0 <= i < queue.Length
@@ -111,7 +113,7 @@ method Main()
     assert isEmpty == true;
     
     // Add
-    queue.add(2);
+    queue.add(5);
 
     // Confirma que nao esta mais vazio
     isEmpty := queue.isEmpty();
@@ -121,13 +123,13 @@ method Main()
 
     // Confirma o numero no topo da pilha
     var num := queue.get();
-    assert num == 2;
+    assert num == 5;
 
     // Add
-    queue.add(5);
+    queue.add(6);
     // Confirma o numero no topo da pilha
     num := queue.get();
-    assert num == 5;
+    assert num == 6;
     size := queue.size();
     assert size == 2;
 
@@ -137,7 +139,7 @@ method Main()
     size := queue.size();
     assert size == 1;
     num := queue.get();
-    assert num == 2;
+    assert num == 5;
 
 
     // Confirma que a pilha esta vazia
