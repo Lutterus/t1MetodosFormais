@@ -1,71 +1,91 @@
-class Queue
+class {:autocontracts} Queue
 {
     var queue: array<int>;
+    ghost var queueAbs: seq<nat>;
+    ghost var queueSizeAbs: int;
+
+    predicate Valid()
+    {
+        queueSizeAbs == queue.Length &&
+        (
+            (queueSizeAbs == 0 && queueAbs == []) ||
+            queueAbs == queue[0..queueSizeAbs]
+        )
+    }
 
     constructor ()
         ensures queue.Length == 0
+        ensures queueAbs == []
+        ensures queueSizeAbs == queue.Length;
     {
         queue := new int[0];
+        queueAbs := [];
+        queueSizeAbs := 0;
     }
 
     method isEmpty() returns (boolean:bool)
-    ensures (queue.Length == 0 && boolean == true) || (queue.Length > 0 && boolean == false)
+        ensures (queueSizeAbs == 0 && boolean == true) || (queueSizeAbs > 0 && boolean == false)
+        ensures Valid()
     {
         if(queue.Length == 0) {
             boolean := true;
         } else {
             boolean := false;
         }
+        
         return boolean;
     }
 
-    method size() returns (size:nat)
-    ensures size == queue.Length
+    method size() returns (size:int)
+        ensures size == queueSizeAbs
     {
-        return queue.Length;
+        size := queue.Length;
+        return size;
     }
 
     method get() returns (num:int)
-        requires queue.Length > 0
+        requires queueSizeAbs > 0
         ensures num == queue[0]
     {
         return queue[0];
     }
 
     method add(newNumber:nat)
-        modifies this
-        ensures queue.Length == old(queue.Length + 1)
+        ensures queueSizeAbs == old(queueSizeAbs + 1)
         ensures queue[0] == newNumber
-        ensures forall k :: 1 <= k < queue.Length ==> queue[k] == old(queue[k-1])
+        ensures forall k :: 1 <= k < queueSizeAbs ==> queue[k] == old(queue[k-1])
     {
         var newQueue := new int[queue.Length + 1];
         newQueue[0] := newNumber;
 
-        forall i | 1 <= i < newQueue.Length { 
+        forall i | 1 <= i < queue.Length + 1 { 
             newQueue[i] := queue[i - 1];
         }
 
         queue := newQueue;
+        // Atualiza ghosts
+        queueAbs := queue[0..queue.Length];
+        queueSizeAbs := queueSizeAbs + 1;
     }
 
     method pop()
-        modifies this
-        requires queue.Length > 0
-        // ensures (old(queue.Length) == 1 && queue.Length == 0)
-        ensures (queue.Length >= 0 && queue.Length == old(queue.Length - 1))
-        ensures forall k :: 0 <= k < queue.Length ==> queue[k] == old(queue[k+1])
+        requires queueSizeAbs > 0
+        ensures (queueSizeAbs >= 0 && queueSizeAbs == old(queueSizeAbs - 1))
+        ensures forall k :: 0 <= k < queueSizeAbs ==> queue[k] == old(queue[k+1])
     {
         var newQueue := new int[queue.Length - 1];
-        forall i | 0 <= i < newQueue.Length { 
+        forall i | 0 <= i < queue.Length - 1 { 
             newQueue[i] := queue[i + 1];
         }
         queue := newQueue;
+        // Atualiza ghosts
+        queueAbs := queue[0..queue.Length];
+        queueSizeAbs := queueSizeAbs - 1;
     }
 
     method invert()
-        modifies this
-        ensures queue.Length == old(queue.Length)
-        ensures forall k :: 0 <= k < queue.Length ==> queue[k] == old(queue[queue.Length - (k+1)])
+        ensures queueSizeAbs == old(queueSizeAbs)
+        ensures forall k :: 0 <= k < queueSizeAbs ==> queue[k] == old(queue[queueSizeAbs - (k+1)])
     {
         var newQueue := new int[queue.Length];
         forall i | 0 <= i < queue.Length
@@ -73,6 +93,9 @@ class Queue
             newQueue[i] := queue[queue.Length - (i + 1)];
         }
         queue := newQueue;
+        // Atualiza ghosts
+        queueAbs := queue[0..queue.Length];
+        queueSizeAbs := queue.Length;
     }
 }
 
